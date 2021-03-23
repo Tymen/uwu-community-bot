@@ -10,7 +10,24 @@ let getMemberCount = (client) => {
 // Define Variables
 const defaultColor = '#fcca03'
 const defaultAuthor = 'UwU Community'
+let getquotes = (sql, db) => {
+    return new Promise(data => {
+        db.query(sql, (error, result) => {
+            if (error) {
+                console.log(error);
+                throw error;
+            }
+            try {
+                data(result);
 
+            } catch (error) {
+                data({});
+                throw error;
+            }
+
+        });
+    });
+}
 // Custom messages
 const quote = {
     add: (Author, client, db, args) => {
@@ -34,33 +51,27 @@ const quote = {
         });
         return customMessage.quote(client, Author.id, quotedUser.id, quote)
     },
-    get: (Author, client, db, args) => {
-        console.log(args)
+    get: async (Author, client, db, args) => {
         let quotedUser = args[0]
+        let userquotes = [];
         if (quotedUser.startsWith('<@') && quotedUser.endsWith('>')) {
             quotedUser = quotedUser.slice(2, -1);
     
             if (quotedUser.startsWith('!')) {
                 quotedUser = quotedUser.slice(1);
             }
-    
-            quotedUser = client.users.cache.get(quotedUser);
         }
-        let quote = "testquote"
-        var sql = `SELECT * FROM quotes`;
-        let userquotes = {};
-        let quotes = {};
-        db.query(sql, function (err, result) {
-            if (err) throw err;
-            quotes = result
-            console.log(result)
+        quotedUser = client.users.cache.get(quotedUser);
+        var sql = `SELECT * FROM quotes WHERE user_id='${quotedUser.id}'`;
+        let quotes = await getquotes(sql, db);
+        Object.entries(quotes).forEach(entry => {
+            const [key, value] = entry;
+            userquotes.push({ name: '\u200B', value: value.body, inline: true });
         });
-        // Object.entries(quotes).forEach(entry => {
-        //     const [key, value] = entry;
-        //     userquotes.push({ name: '\u200B', value: value, inline: true });
-        //   });
-        // return customMessage.quoteList(client, quotedUser, userquotes)
-    }
+        let getMessage = customMessage.quoteList(client, quotedUser, userquotes);
+        console.log(getMessage);
+        return getMessage;
+    },
 }
 
 module.exports = { quote }

@@ -62,9 +62,9 @@ const customMessage = {
     quoteList: (client, quotedUser, quotes) => {
         return new Discord.MessageEmbed()
         .setColor(defaultColor)
-        .setAuthor(client.users.cache.get(quotedUser).username)
+        .setAuthor(quotedUser.username)
         .addFields(quotes)
-        .setThumbnail(client.users.cache.get(quotedUser).displayAvatarURL({ dynamic: true }))
+        .setThumbnail(quotedUser.displayAvatarURL({ dynamic: true }))
     }
 }
 
